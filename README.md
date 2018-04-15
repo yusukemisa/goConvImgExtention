@@ -15,8 +15,9 @@
 * [x] Travis CIで自動テストされるようにしてみる
 
 ## Packages
-* convertor
-** 画像形式を変換する機能を持つパッケージ
+* convertor 画像形式を変換する機能を持つパッケージ
+[![GoDoc](https://godoc.org/github.com/yusukemisa/goConvImgExtention/convertor?status.svg)](https://godoc.org/github.com/yusukemisa/goConvImgExtention/convertor)
+
 
 ## How to use
 
