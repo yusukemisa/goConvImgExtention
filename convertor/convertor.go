@@ -32,6 +32,10 @@ func (c *Convertor) Convert(targetPath string) {
 
 //convFileExtention はWalkから呼ばれるコールバック関数
 func (c *Convertor) convFileExtention(path string, info os.FileInfo, err error) error {
+	if err != nil {
+		fmt.Printf("An error has occurred in convFileExtention\n%v\n", err.Error())
+		return err
+	}
 	//ディレクトリの場合スルー
 	if info.IsDir() {
 		return nil

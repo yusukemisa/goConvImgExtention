@@ -31,16 +31,17 @@ func main() {
 		flag.Usage()
 		os.Exit(1)
 	}
+	rootPath := flag.Args()[0]
 	//引数のディレクトリないと終了
-	dir, err := os.Stat(flag.Args()[0])
+	_, err := os.Stat(rootPath)
 	if err != nil {
-		fmt.Printf("指定されたディレクトリがありません:%v\n", flag.Args()[0])
+		fmt.Printf("指定されたディレクトリがありません:%v\n", rootPath)
 		flag.Usage()
 		os.Exit(1)
 	}
 	//フラグにサポート対象の拡張子が指定されている場合変換実行
 	if c := convertor.New(*from, *to); c != nil {
-		c.Convert(dir.Name())
+		c.Convert(rootPath)
 	} else {
 		fmt.Println("サポート対象外の画像形式が指定されています。")
 		flag.Usage()
