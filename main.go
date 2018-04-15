@@ -16,10 +16,10 @@ func init() {
 		fmt.Fprintf(os.Stderr, "Usage of %s:\n", os.Args[0])
 		flag.PrintDefaults()
 		convertor.PrintSupportImageExtention()
-		fmt.Println("<コマンド実行例>")
-		fmt.Println("------------------------------------------------")
-		fmt.Println("$goConvImgExtention -f jpg -t png {targetDir}")
-		fmt.Println("------------------------------------------------")
+		fmt.Fprintln(os.Stderr, "<コマンド実行例>")
+		fmt.Fprintln(os.Stderr, "------------------------------------------------")
+		fmt.Fprintln(os.Stderr, "$goConvImgExtention -f jpg -t png {targetDir}")
+		fmt.Fprintln(os.Stderr, "------------------------------------------------")
 	}
 	flag.Parse()
 }
@@ -27,7 +27,8 @@ func init() {
 func main() {
 	//引数指定なしは終了
 	if len(flag.Args()) != 1 {
-		fmt.Println("変換対象とするディレクトリを１つ指定してください")
+
+		fmt.Fprintln(os.Stderr, "変換対象とするディレクトリを１つ指定してください")
 		flag.Usage()
 		os.Exit(1)
 	}
@@ -35,7 +36,7 @@ func main() {
 	//引数のディレクトリないと終了
 	_, err := os.Stat(rootPath)
 	if err != nil {
-		fmt.Printf("指定されたディレクトリがありません:%v\n", rootPath)
+		fmt.Fprintf(os.Stderr, "指定されたディレクトリがありません:%v\n", rootPath)
 		flag.Usage()
 		os.Exit(1)
 	}
@@ -43,7 +44,7 @@ func main() {
 	if c := convertor.New(*from, *to); c != nil {
 		c.Convert(rootPath)
 	} else {
-		fmt.Println("サポート対象外の画像形式が指定されています。")
+		fmt.Fprintln(os.Stderr, "サポート対象外の画像形式が指定されています。")
 		flag.Usage()
 		os.Exit(1)
 	}
