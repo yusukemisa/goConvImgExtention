@@ -41,23 +41,22 @@ func New(args []string) (*Convertor, error) {
 	/*
 		引数とフラグの処理
 	*/
-	if len(args) != 2 {
+	flag.CommandLine.Parse(args[1:])
+
+	if len(flag.Args()) != 1 {
 		return nil, errors.New("変換対象とするディレクトリを１つ指定してください")
 	}
 	//引数のディレクトリの存在チェック
-	_, err := os.Stat(args[1])
+	_, err := os.Stat(flag.Args()[0])
 	if err != nil {
 		return nil, err
 	}
-	//フラグのパース
-	flag.CommandLine.Parse(args[1:])
-
 	//サポート対象外の拡張子が指定された場合nilを返す
 	if ImageExtention[*from] && ImageExtention[*to] {
 		return &Convertor{
 			From:       *from,
 			To:         *to,
-			TargetPath: args[1],
+			TargetPath: flag.Args()[0],
 		}, nil
 	}
 	return nil, errors.New("サポート対象外の画像形式が指定されています。")
@@ -82,14 +81,13 @@ func (c *Convertor) process(path string, info os.FileInfo, err error) error {
 	if ext != c.From {
 		return nil
 	}
-
 	//変換元画像処理
 	imgFileFrom, err := os.Open(path)
 	if err != nil {
 		return errors.Wrapf(err, "%v could not open:%v\n", path, err.Error())
 	}
 	defer imgFileFrom.Close()
-
+	fmt.Printf("%v open", path)
 	imgFrom, _, err := image.Decode(imgFileFrom)
 	if err != nil {
 		return errors.Wrapf(err, "%v could not decode:%v\n", path, err.Error())
