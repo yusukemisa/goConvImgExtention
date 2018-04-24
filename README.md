@@ -35,9 +35,9 @@
 $go get github.com/yusukemisa/goConvImgExtention
 
 // execute
-$goConvImgExtention -f png -t webp imageDir
-convert imageDir/2.png -> imageDir/2.webp
-convert imageDir/depth1/depth2/111.png -> imageDir/depth1/depth2/111.webp
+$goConvImgExtention -f png -t jpg imageDir
+convert imageDir/2.png -> imageDir/2.jpg
+convert imageDir/depth1/depth2/111.png -> imageDir/depth1/depth2/111.jpg
 ```
 
 ### テスト実行
