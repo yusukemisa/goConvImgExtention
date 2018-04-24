@@ -1,50 +1,80 @@
 package convertor
 
 import (
+	"flag"
 	"fmt"
 	"image"
 	"image/gif"
 	"image/jpeg"
 	"image/png"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/pkg/errors"
 )
 
-//Convertor is struct
-type Convertor struct {
-	From string
-	To   string
+var from = flag.String("f", "jpg", "convert from")
+var to = flag.String("t", "png", "convert to")
+
+//Usage of goConvImgExtention
+var Usage = func() {
+	fmt.Fprintf(os.Stderr, "Usage of %s:\n", os.Args[0])
+	flag.PrintDefaults()
+	fmt.Fprintln(os.Stderr, SupportDescription())
+	fmt.Fprintln(os.Stderr, "<コマンド実行例>")
+	fmt.Fprintln(os.Stderr, "------------------------------------------------")
+	fmt.Fprintln(os.Stderr, "$goConvImgExtention -f jpg -t png {targetPath}")
+	fmt.Fprintln(os.Stderr, "------------------------------------------------")
 }
 
-var count int
+//Convertor struct
+type Convertor struct {
+	From       string
+	To         string
+	TargetPath string
+}
 
-//New サポート対象外の拡張子が指定された場合nilを返す
-func New(from, to string) *Convertor {
-	if ImageExtention[from] && ImageExtention[to] {
+//New コンバーターインスタンス作成
+func New(args []string) (*Convertor, error) {
+	/*
+		引数とフラグの処理
+	*/
+	if len(args) != 2 {
+		return nil, errors.New("変換対象とするディレクトリを１つ指定してください")
+	}
+	//引数のディレクトリの存在チェック
+	_, err := os.Stat(args[1])
+	if err != nil {
+		return nil, err
+	}
+	//フラグのパース
+	flag.CommandLine.Parse(args[1:])
+
+	//サポート対象外の拡張子が指定された場合nilを返す
+	if ImageExtention[*from] && ImageExtention[*to] {
 		return &Convertor{
-			From: from,
-			To:   to,
-		}
+			From:       *from,
+			To:         *to,
+			TargetPath: args[1],
+		}, nil
+	}
+	return nil, errors.New("サポート対象外の画像形式が指定されています。")
+}
+
+//Convert は引数で指定されたディレクトリ配下のファイルの拡張子を再帰的にFrom->Toに変換します。
+func (c *Convertor) Convert() error {
+	if err := filepath.Walk(c.TargetPath, c.process); err != nil {
+		return errors.Wrapf(err, "%v配下の変換時に問題が起きました\n%v\n", c.TargetPath)
 	}
 	return nil
 }
 
-//Convert はtargetPath配下のファイルの拡張子をFrom->Toに変換します。
-//targetPath配下は再帰的に処理されます。
-func (c *Convertor) Convert(targetPath string) {
-	filepath.Walk(targetPath, c.process)
-	fmt.Printf("%v件処理しました\n", count)
-}
-
 //process はWalkから呼ばれるコールバック関数
 func (c *Convertor) process(path string, info os.FileInfo, err error) error {
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "An error has occurred in process\n%v\n", err.Error())
-		return err
-	}
 	//ディレクトリの場合スルー
-	if info.IsDir() {
+	if err != nil || info.IsDir() {
 		return nil
 	}
 	//変換対象の拡張子でなければスルー
@@ -53,33 +83,27 @@ func (c *Convertor) process(path string, info os.FileInfo, err error) error {
 		return nil
 	}
 
-	//画像形式変換
+	//変換元画像処理
 	imgFileFrom, err := os.Open(path)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "%v could not open:%v\n", path, err.Error())
-		return err
+		return errors.Wrapf(err, "%v could not open:%v\n", path, err.Error())
 	}
 	defer imgFileFrom.Close()
 
 	imgFrom, _, err := image.Decode(imgFileFrom)
 	if err != nil {
-		//変換対象の拡張子を持つファイルがデコードできない場合はスキップする
-		fmt.Fprintf(os.Stderr, "%v could not decode:%v\n", path, err.Error())
-		return nil
+		return errors.Wrapf(err, "%v could not decode:%v\n", path, err.Error())
 	}
-	//変換先のファイルの作成
+
+	//変換先のファイル作成
 	rename := strings.TrimRight(path, c.From) + c.To
 	imgFileTo, err := os.Create(rename)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "%v could not create:%v\n", rename, err.Error())
-		return err
+		return errors.Wrapf(err, "%v could not create:%v\n", rename, err.Error())
 	}
 	defer imgFileTo.Close()
 
-	/*
-		imageExtention.goにサポートする画像形式を定義したけど
-		ここの分岐でベタ書きしちゃってるので活かせてない・・・
-	*/
+	//形式に応じてエンコード
 	switch ext {
 	case "jpeg", "jpg":
 		err = jpeg.Encode(imgFileTo, imgFrom, nil)
@@ -88,7 +112,6 @@ func (c *Convertor) process(path string, info os.FileInfo, err error) error {
 	case "png":
 		err = png.Encode(imgFileTo, imgFrom)
 	}
-	fmt.Printf("convert %v -> %v\n", path, rename)
-	count++
+	log.Printf("convert %v -> %v\n", path, rename)
 	return err
 }
