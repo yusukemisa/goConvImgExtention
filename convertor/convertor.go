@@ -15,9 +15,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-var from = flag.String("f", "jpg", "convert from")
-var to = flag.String("t", "png", "convert to")
-
 //Usage of goConvImgExtention
 var Usage = func() {
 	fmt.Fprintf(os.Stderr, "Usage of %s:\n", os.Args[0])
@@ -41,13 +38,17 @@ func New(args []string) (*Convertor, error) {
 	/*
 		引数とフラグの処理
 	*/
-	flag.CommandLine.Parse(args[1:])
+	flags := flag.NewFlagSet("convertor", flag.ContinueOnError)
+	flags.SetOutput(os.Stderr)
+	from := flags.String("f", "jpg", "convert from")
+	to := flags.String("t", "png", "convert to")
+	flags.Parse(args[1:])
 
-	if len(flag.Args()) != 1 {
+	if len(flags.Args()) != 1 {
 		return nil, errors.New("変換対象とするディレクトリを１つ指定してください")
 	}
 	//引数のディレクトリの存在チェック
-	_, err := os.Stat(flag.Args()[0])
+	_, err := os.Stat(flags.Args()[0])
 	if err != nil {
 		return nil, err
 	}
@@ -56,7 +57,7 @@ func New(args []string) (*Convertor, error) {
 		return &Convertor{
 			From:       *from,
 			To:         *to,
-			TargetPath: flag.Args()[0],
+			TargetPath: flags.Args()[0],
 		}, nil
 	}
 	return nil, errors.New("サポート対象外の画像形式が指定されています。")
@@ -87,7 +88,6 @@ func (c *Convertor) process(path string, info os.FileInfo, err error) error {
 		return errors.Wrapf(err, "%v could not open:%v\n", path, err.Error())
 	}
 	defer imgFileFrom.Close()
-	fmt.Printf("%v open", path)
 	imgFrom, _, err := image.Decode(imgFileFrom)
 	if err != nil {
 		return errors.Wrapf(err, "%v could not decode:%v\n", path, err.Error())

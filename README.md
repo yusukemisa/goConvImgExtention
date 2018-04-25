@@ -13,11 +13,11 @@
 * [x] ユーザ定義型を作ってみる
 * [x] テストコードを作ってみる
 * [x] テストコード書きやすいようにリファクタ(独立性を高める)
-* [ ] テストコードのパッケージは「{test対象package名}_test」にする
+* [x] テストコードのパッケージは「{test対象package名}_test」にする
 * [ ] Exampleテストを作成する
-* [ ] サブテストを作成する
-* [ ] テーブル駆動テストを作成する
-* [ ] カバレッジを取得、可視化する
+* [x] サブテストを作成する
+* [x] テーブル駆動テストを作成する
+* [x] カバレッジを取得、可視化する
 
 
 * [x] Travis CIで自動テストされるようにしてみる
@@ -95,6 +95,12 @@ func TestFlagParser(t *testing.T) {
 }
 ```
 
+### カバレッジ測定
+```
+$go test -coverprofile=profile github.com/yusukemisa/goConvImgExtention/convertor
+ok      github.com/yusukemisa/goConvImgExtention/convertor      0.009s  coverage: 26.4% of statements
+$go tool cover -html=profile
+```
 
 
 ### テストヘルパー関数

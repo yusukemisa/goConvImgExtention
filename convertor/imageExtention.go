@@ -15,7 +15,6 @@ var ImageExtention = map[string]bool{
 //SupportDescription サポートする画像形式出力
 var SupportDescription = func() string {
 	return fmt.Sprintf("<サポートする画像形式>\n%v\n", Keys(ImageExtention))
-
 }
 
 //Keys ImageExtentionのキーだけ取り出す
