@@ -6,7 +6,7 @@ install:
   - go get github.com/yusukemisa/goConvImgExtention
 
 script:
-  - go test -coverprofile=profile github.com/yusukemisa/goConvImgExtention/convertor
+  - go test -coverprofile=coverage.txt github.com/yusukemisa/goConvImgExtention/convertor
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
