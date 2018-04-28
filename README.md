@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/yusukemisa/goConvImgExtention.svg?branch=master)](https://travis-ci.org/yusukemisa/goConvImgExtention)
-
+[![codecov](https://codecov.io/gh/yusukemisa/goConvImgExtention/branch/master/graph/badge.svg)](https://codecov.io/gh/yusukemisa/goConvImgExtention)
 ## goConvImgExtention
 * [x] 引数としてディレクトリを指定する
 * [x] 指定したディレクトリ以下のJPGファイルをPNGに変換
